@@ -74,6 +74,22 @@ class Manipulator():
             pb.stepSimulation()
             sleep(0.05)
     
+    def getJointInfo(self):
+        '''
+        sets the joint info in the joint Info class formed
+        '''
+        joint = pb.getJointStates(self.armID,self.controlJoints)
+        
+        jointAngles = [ i[0] for i in joint]
+        jointVelocities = [ i[1] for i in joint]
+        jointReactionForces = [ i[2] for i in joint]
+        
+        self.jointState.jointAngles = jointAngles
+        self.jointState.jointVelocities = jointVelocities
+        self.jointState.jointReactionForces = jointReactionForces
+        
+        
+        
     
         
             
