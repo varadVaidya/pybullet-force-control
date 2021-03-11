@@ -8,8 +8,9 @@ import pybullet as pb
 import pybullet_data
 from time import sleep
 from math import sin,cos
-
-
+import matplotlib.pyplot as plt
+from matplotlib import style
+from matplotlib.animation import FuncAnimation
 class Manipulator():
     
     
@@ -89,6 +90,11 @@ class Manipulator():
         ## the length for the zero vector is the length of the control joints         
         self.controlZero = [0] * len(self.controlJoints)
         
+        ## empty list to hold all the error values.
+        self.plotError = []
+        self.plotIndex = []     ##index list to storeas a time representative.
+        
+        self.XError , self.YError , self.ZError , self.RollError , self.PitchError , self.YawError = [],[],[],[],[],[]
         ## init the container class for joint state
         self.jointState = self.JointStateInfo()
         ## init the container class for forward kinematics
@@ -167,6 +173,58 @@ class Manipulator():
         
         self.Jacobian.analyticJacobian = analyticJacobian
         self.Jacobian.analyticJacobianInv = np.linalg.inv(analyticJacobian)
+    
+    def plotValues(self, plotError, time):
+        
+        #style.use('fivethirtyeight')
+        
+        fig = plt.figure()
+        ax1 = fig.add_subplot(1,1,1)
+        ax1.set_title('Error Over Time')
+        
+        
+        print("i reached here")
+        ax1.plot(time,plotError[:,0] , label = 'X error' )
+        ax1.plot(time,plotError[:,1] , label = 'Y error' )
+        ax1.plot(time,plotError[:,2] , label = 'Z error' )
+        ax1.plot(time,plotError[:,3] , label = 'Roll error' )
+        ax1.plot(time,plotError[:,4] , label = 'Pitch error' )
+        ax1.plot(time,plotError[:,5] , label = 'Yaw error' )
+        plt.tight_layout()
+        ax1.legend()
+        
+        plt.show()
+        
+    # def animate(self,i):
+    #     if self.plotError[-1] is not None:
+    #         Xe,Ye,Ze,Re,Pe,Ye = self.plotError[-1]
+    #     else:
+    #         Xe,Ye,Ze,Re,Pe,Ye = 0,0,0,0,0,0
+    #     self.XError.append(Xe)
+    #     self.YError.append(Ye)
+    #     self.ZError.append(Ze)
+        
+    #     self.RollError.append(Re)
+    #     self.PitchError.append(Pe)
+    #     self.YawError.append(Ye)
+        
+    #     plt.cla()
+        
+    #     plt.plot(self.plotIndex,self.XError,label = 'X error')
+    #     plt.plot(self.plotIndex,self.YError,label = 'Y error')
+    #     plt.plot(self.plotIndex,self.ZError,label = 'Z error')
+    #     plt.plot(self.plotIndex,self.RollError,abel = 'Roll error')
+    #     plt.plot(self.plotIndex,self.PitchError,label = 'Pitch error')
+    #     plt.plot(self.plotIndex,self.YawError,label = 'Yaw error')
+    
+    # def livePlot(self):
+    #     ani = FuncAnimation(plt.gcf(), self.animate , interval = 100)
+    #     plt.show()
+        
+        
+        
+        
+        
         
         
         
