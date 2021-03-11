@@ -154,14 +154,16 @@ class Manipulator():
             [0,sin(x),cos(x)*cos(y)]
         ])
         
+        ER_MatrixInv = np.linalg.inv(ER_Matrix)
+        
         Ee_Matrix = np.block([
             [np.eye(3,3),     np.zeros((3,3))],
-            [np.zeros((3,3)) , ER_Matrix   ]
+            [np.zeros((3,3)) , ER_MatrixInv   ]
         ])
         
-        Ee_MatirxInv = np.linalg.inv(Ee_Matrix)
+        #Ee_MatirxInv = np.linalg.inv(Ee_Matrix)
         
-        analyticJacobian = Ee_MatirxInv.dot(geometricJacobian)
+        analyticJacobian = Ee_Matrix.dot(geometricJacobian)
         
         self.Jacobian.analyticJacobian = analyticJacobian
         self.Jacobian.analyticJacobianInv = np.linalg.inv(analyticJacobian)
