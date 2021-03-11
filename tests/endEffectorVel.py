@@ -11,19 +11,19 @@ import pybullet as pb
 
 robot = Manipulator()
 
-jointAngles = [0,-2,2,-1.57,-1.57,-1.57]
+jointAngles = [0.2,-2.7,2.4,-1.57,-1.57,-1.57]
 robot.setJointAngles(jointAngles)
-desiredJointVelocityAngular = np.array([-0.0,0,-0.,0.,-0.,0.1])
-desiredJointVelocityRPY = np.array([0,0,0.0,0.0,0.0,0.1])
+desiredENDVelocityAngular = np.array([-0.0,0,-0.,0.,-0.,0.1])
+desiredENDVelocityRPY = np.array([0.0,0.0,0,0.1,0.,0.0])
 while True:
     robot.getJointInfo()
     robot.getForwardKinematics()
     
     robot.calculateJacobian()
     #print("the geometric jacobian is:" , robot.Jacobian.geometricJacobian  )
-    jointVelocityAngular = robot.Jacobian.geometricJacobianInv.dot(desiredJointVelocityAngular)
+    jointVelocityAngular = robot.Jacobian.geometricJacobianInv.dot(desiredENDVelocityAngular)
     #print(jointVelocity,"is the joint velocity")
-    jointVelocityRPY = robot.Jacobian.analyticJacobianInv.dot(desiredJointVelocityRPY)
+    jointVelocityRPY = robot.Jacobian.analyticJacobianInv.dot(desiredENDVelocityRPY)
     
     #print(robot.Jacobian.analyticJacobian.dot(jointVelocityRPY))
     
