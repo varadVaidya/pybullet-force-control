@@ -208,6 +208,9 @@ class Manipulator():
         self.DynamicMatrices.gravityVector = gravityVector
         self.DynamicMatrices.coriolisVector = coriolisVector
     
+    def turnOFFActuators(self):
+        pb.setJointMotorControlArray(self.armID,self.controlJoints,pb.VELOCITY_CONTROL,forces = self.controlZero)
+    
     def plotValues(self, plotError, time):
         
         #style.use('fivethirtyeight')
