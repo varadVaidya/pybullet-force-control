@@ -49,6 +49,17 @@ class Manipulator():
             self.geometricJacobianInv = geometricJacobianInv
             self.analyticJacobianInv = analyticJacobianInv
             super().__init__()
+        
+    #container class to store dynamic matrices
+    class RobotDynamicMatrices():
+        
+        def __init__(self, massMatrix = None, coriolisVector = None , gravityVector = None) :
+            
+            self.massMatrix = massMatrix
+            self.coriolisVector = coriolisVector
+            self.gravityVector = gravityVector
+            
+            super().__init__()
     
     def __init__(self,basePosition = [0,0,0],baseOrientation = [0,0,0,1]):
         
@@ -102,6 +113,10 @@ class Manipulator():
         
         ## init the container class for the jacobian
         self.Jacobian = self.RobotJacobian()
+        
+        ## init the container class to store dynamic matrices.
+        self.DynamicMatrices = self.RobotDynamicMatrices()
+        
         
     ## moves the robot to the desired joint angles for the simulatiuons
     def setJointAngles(self,jointAngles):
@@ -174,6 +189,25 @@ class Manipulator():
         self.Jacobian.analyticJacobian = analyticJacobian
         self.Jacobian.analyticJacobianInv = np.linalg.inv(analyticJacobian)
     
+    def getDyanamicMatrices(self):
+        
+        massMatrix = np.array(
+            pb.calculateMassMatrix(self.armID,self.jointState.jointAngles)
+        )
+        
+        gravityVector = np.array(
+            pb.calculateInverseDynamics(self.armID,self.jointState.jointAngles,self.controlZero,self.controlZero)
+        )
+        
+        coriolisGravityVector = np.array(
+            pb.calculateInverseDynamics(self.armID,self.jointState.jointAngles,self.jointState.jointVelocities,self.controlZero)
+        )
+        coriolisVector = coriolisGravityVector - gravityVector
+        
+        self.DynamicMatrices.massMatrix = massMatrix
+        self.DynamicMatrices.gravityVector = gravityVector
+        self.DynamicMatrices.coriolisVector = coriolisVector
+    
     def plotValues(self, plotError, time):
         
         #style.use('fivethirtyeight')
@@ -220,6 +254,8 @@ class Manipulator():
     # def livePlot(self):
     #     ani = FuncAnimation(plt.gcf(), self.animate , interval = 100)
     #     plt.show()
+    
+    
         
         
         
