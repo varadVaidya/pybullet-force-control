@@ -229,7 +229,7 @@ class Manipulator():
         for i in self.controlJoints:
             pb.changeDynamics(self.armID,i, linearDamping = 0, angularDamping = 0 , jointDamping = 0 )
             
-    def planJointTrajectory(self,initJointAngle,finalJointAngle,trajTime):
+    def planJointTrajectory(self,initJointAngle,finalJointAngle,trajTime,simTimeArray):
         ## plan a cubic trajectory beetween two points in joint space.
         '''
         inputs to this function are:
@@ -238,6 +238,10 @@ class Manipulator():
         3.  trajectory time
         
         '''
+        jointAngleTraj = np.empty_like(simTimeArray)
+        jointVelTraj = np.empty_like(simTimeArray)
+        jointAccelTraj = np.empty_like(simTimeArray)
+        
         simTime = trajTime # sec
         timeSteps = simTime * 240
         time = np.linspace(0,simTime,num=timeSteps)
@@ -253,13 +257,21 @@ class Manipulator():
         jointCoeff = np.linalg.solve(coeffMatrix,jointConstraint)
         jointVelCoeff = [3*jointCoeff[0] , 2*jointCoeff[1], jointCoeff[2]]
         
-        jointAngleTraj = np.polyval(jointCoeff,time)
-        jointVelTraj = np.polyval(jointVelCoeff,time)
-        jointAccelTraj = np.zeros_like(time)
+        jointAngle = np.polyval(jointCoeff,time)
+        jointVel = np.polyval(jointVelCoeff,time)
+        jointAccel = np.zeros_like(time)
+        
+        jointAngleTraj[0:jointAngle.size] = jointAngle
+        jointVelTraj[0:jointVel.size] = jointVel
+        jointAccelTraj[0:jointAccel.size] = jointAccel
+        
+        jointAngleTraj[jointAngle.size:] = jointAngle[-1]
+        jointVelTraj[jointVel.size:] = jointVel[-1]
+        jointAccelTraj[jointAccel.size:] = jointAccel[-1]
         
         return jointAngleTraj,jointVelTraj,jointAccelTraj
     
-    def getJointsTrajectory(self,initJointAngles,finalJointAngles,trajTime):
+    def getJointsTrajectory(self,initJointAngles,finalJointAngles,trajTime,simTimeArray):
         
         jointAngleTraj = []
         jointVelTraj = []
@@ -267,7 +279,7 @@ class Manipulator():
         
         for i in initJointAngles:
             init,final = initJointAngles[i],finalJointAngles[i]
-            AngleTraj,VelTraj,AccelTraj = self.planJointTrajectory(init,final,trajTime)
+            AngleTraj,VelTraj,AccelTraj = self.planJointTrajectory(init,final,trajTime,simTimeArray)
             
             jointAngleTraj.append(AngleTraj)
             jointVelTraj.append(VelTraj)
