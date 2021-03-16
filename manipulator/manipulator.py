@@ -277,7 +277,7 @@ class Manipulator():
         jointVelTraj = []
         jointAccelTraj = []
         
-        for i in initJointAngles:
+        for i in range(len(initJointAngles)):
             init,final = initJointAngles[i],finalJointAngles[i]
             AngleTraj,VelTraj,AccelTraj = self.planJointTrajectory(init,final,trajTime,simTimeArray)
             
