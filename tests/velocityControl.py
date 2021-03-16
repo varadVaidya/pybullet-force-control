@@ -11,23 +11,23 @@ import pybullet as pb
 ## set the style for matplotli
 robot = Manipulator()
 
-jointAngles = [1.57,-2.7,2.4,-1.57,-1.57,-1.57]
+jointAngles = [0,-1.57,1.57,-1.57,-1.57,-1.57]
 robot.setJointAngles(jointAngles)
 
 # sim time parameters
-simTime = 20 # sec
+simTime = 30 # sec
 timeSteps = simTime * 240
 time = np.linspace(0,simTime,num=timeSteps)
 
 
-desEndEffector = np.array([0.7,0.2,0.5,0.2,1.2,0.5])
+desEndEffector = np.array([0.5,0.2,1,0.2,1.2,0.5])
 desEndEffectorVel = np.array([0,0,0,0,0,0])
 
 # Kp = np.diag([.1,.1,.1,0.1,0.1,0.1])
 # Kd = np.diag([0.1,0.1,0.1,0.1,0.1,0.1])
 
-Kp = np.diag(6*[0.4])
-Kd = np.diag(6*[0.12])
+Kp = np.diag(6*[1.6])
+Kd = np.diag(6*[0.48])
 
 
 for i in range(len(time)):
