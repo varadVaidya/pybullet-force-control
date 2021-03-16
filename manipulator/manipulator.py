@@ -7,7 +7,7 @@ import numpy as np
 import pybullet as pb
 import pybullet_data
 from time import sleep
-from math import sin,cos
+from math import sin,cos,pow
 import matplotlib.pyplot as plt
 from matplotlib import style
 from matplotlib.animation import FuncAnimation
@@ -60,6 +60,16 @@ class Manipulator():
             self.gravityVector = gravityVector
             
             super().__init__()
+    
+    ## container class to store desired hjoint angles:
+    
+    class desiredJointState():
+        def __init__(self,jointAngleTraj = None,jointVelTraj = None,jointAccelTraj = None):
+            
+            self.jointAngleTraj = jointAngleTraj
+            self.jointVelTraj = jointVelTraj
+            self.jointAccelTraj = jointAccelTraj
+    
     
     def __init__(self,basePosition = [0,0,0],baseOrientation = [0,0,0,1]):
         
@@ -116,6 +126,9 @@ class Manipulator():
         
         ## init the container class to store dynamic matrices.
         self.DynamicMatrices = self.RobotDynamicMatrices()
+        
+        ## init the container class to store trajectory
+        self.TrajectoryPlan = self.desiredJointState()
         
         
     ## moves the robot to the desired joint angles for the simulatiuons
@@ -211,6 +224,67 @@ class Manipulator():
     def turnOFFActuators(self):
         pb.setJointMotorControlArray(self.armID,self.controlJoints,pb.VELOCITY_CONTROL,forces = self.controlZero)
     
+    def turnOFFInternalDamping(self):
+        
+        for i in self.controlJoints:
+            pb.changeDynamics(self.armID,i, linearDamping = 0, angularDamping = 0 , jointDamping = 0 )
+            
+    def planJointTrajectory(self,initJointAngle,finalJointAngle,trajTime):
+        ## plan a cubic trajectory beetween two points in joint space.
+        '''
+        inputs to this function are:
+        1. initalJointAngles:
+        2. final joint angles
+        3.  trajectory time
+        
+        '''
+        simTime = trajTime # sec
+        timeSteps = simTime * 240
+        time = np.linspace(0,simTime,num=timeSteps)
+        
+        coeffMatrix = np.array([
+            [0,0,0,1],
+            [0,0,1,0],
+            [pow(trajTime,3),pow(trajTime,2),trajTime,1],
+            [3*pow(trajTime,2),2*trajTime,1,0]
+        ])
+        jointConstraint = np.array([initJointAngle,0,finalJointAngle,0])
+        #                       th(0),   thdot(0), th(T) , thdot(T)
+        jointCoeff = np.linalg.solve(coeffMatrix,jointConstraint)
+        jointVelCoeff = [3*jointCoeff[0] , 2*jointCoeff[1], jointCoeff[2]]
+        
+        jointAngleTraj = np.polyval(jointCoeff,time)
+        jointVelTraj = np.polyval(jointVelCoeff,time)
+        jointAccelTraj = np.zeros_like(time)
+        
+        return jointAngleTraj,jointVelTraj,jointAccelTraj
+    
+    def getJointsTrajectory(self,initJointAngles,finalJointAngles,trajTime):
+        
+        jointAngleTraj = []
+        jointVelTraj = []
+        jointAccelTraj = []
+        
+        for i in initJointAngles:
+            init,final = initJointAngles[i],finalJointAngles[i]
+            AngleTraj,VelTraj,AccelTraj = self.planJointTrajectory(init,final,trajTime)
+            
+            jointAngleTraj.append(AngleTraj)
+            jointVelTraj.append(VelTraj)
+            jointAccelTraj.append(AccelTraj)
+        
+        jointAngleTraj = np.array(jointAngleTraj)
+        jointVelTraj = np.array(jointVelTraj)
+        jointAccelTraj = np.array(jointAccelTraj)
+        
+        self.TrajectoryPlan.jointAngleTraj = jointAngleTraj
+        self.TrajectoryPlan.jointVelTraj = jointVelTraj
+        self.TrajectoryPlan.jointAccelTraj = jointAccelTraj
+        
+
+        
+         
+            
     def plotValues(self, plotError, time):
         
         #style.use('fivethirtyeight')
