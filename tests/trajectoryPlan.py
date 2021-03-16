@@ -22,7 +22,11 @@ finaljointAngles = np.array([1,1,1,1,1,1])
 robot.getJointsTrajectory(initjointAngles,finaljointAngles,trajtime,time)
 
 print(robot.TrajectoryPlan.jointAngleTraj[0])
+print("joint angles are: ",robot.TrajectoryPlan.jointAngleTraj[:,1])
+
+print("joint angles are: ",robot.TrajectoryPlan.jointAngleTraj.shape)
 print(robot.TrajectoryPlan.jointVelTraj[0])
+
 '''
 the joint angles provided are : [0.00000000e+00 2.08564959e-06 8.33795716e-06 ... 9.99991662e-01
  9.99997914e-01 1.00000000e+00]
