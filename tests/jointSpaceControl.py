@@ -30,8 +30,8 @@ time = np.linspace(0,simTime,num=timeSteps)
 robot.getJointsTrajectory(jointAngles,desJointAngles,trajTime,time)
 desEndEffectorVel = np.array([0,0,0,0,0,0])
 
-Kp = np.diag(6*[4])
-Kd = np.diag(6*[0])
+Kp = np.diag([3,3,3,1,1,1])
+Kd = np.diag([2,2,2,0.1,0.1,0.1])
 
 for i in range(len(time)):
     robot.getJointInfo()
