@@ -20,8 +20,8 @@ robot.turnOFFInternalDamping()
 desEndEffector = np.array([0.7,0.2,1.5,0.2,1.2,0.5])
 desEndEffectorVel = np.array([0,0,0,0,0,0])
 
-Kp = np.diag([0.5,0.5,0.5,0,0,0])
-Kd = np.diag([0,0,0,0,0,0])
+Kp = np.diag([9,9,9,0.3,.3,.3])
+Kd = np.diag([9,9,9,0,0,0])
 
 
 # sim time parameters
