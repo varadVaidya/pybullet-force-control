@@ -11,6 +11,8 @@ from math import sin,cos,pow
 import matplotlib.pyplot as plt
 from matplotlib import style
 from matplotlib.animation import FuncAnimation
+
+
 class Manipulator():
     
     
@@ -22,22 +24,25 @@ class Manipulator():
             self.jointVelocities = Velocities
             self.jointReactionForces = ReactionForces
             
-            super().__init__()
+            
     
     ## Container class to store forward kinematics  
     class ForwardKinematics():
         
-        def __init__(self, linkPosition = None, linkOrientationQuaternion = None, linkOrientationRPY = None ,rotationMatroix = None, linkStateRPY = None):
+        def __init__(self, linkPosition = None, linkOrientationQuaternion = None, linkOrientationRPY = None ,rotationMatroix = None, linkStateRPY = None,
+                     linkOrientationQuaternionXYZ = None , linkOrientationQuaternionW = None , linkOrientationQuaternionWXYZ = None):
             
             self.linkPosition = linkPosition
             self.linkOrientationQuaternion = linkOrientationQuaternion
+            self.linkOrientationQuaternionXYZ = linkOrientationQuaternionXYZ
+            self.linkOrientationQuaternionW = linkOrientationQuaternionW
             self.linkOrientationRPY = linkOrientationRPY
-            
+            self.linkOrientationQuaternionWXYZ = linkOrientationQuaternionWXYZ
             self.rotationMatrix = rotationMatroix
             
             self.linkState = linkStateRPY
             
-            super().__init__()
+            
     
     ## container class for Jacobain
     class RobotJacobian():
@@ -48,7 +53,7 @@ class Manipulator():
             self.analyticJacobian  = analyticJacobian
             self.geometricJacobianInv = geometricJacobianInv
             self.analyticJacobianInv = analyticJacobianInv
-            super().__init__()
+            
         
     #container class to store dynamic matrices
     class RobotDynamicMatrices():
@@ -59,7 +64,7 @@ class Manipulator():
             self.coriolisVector = coriolisVector
             self.gravityVector = gravityVector
             
-            super().__init__()
+            
     
     ## container class to store desired hjoint angles:
     
@@ -163,6 +168,9 @@ class Manipulator():
         
         self.forwardKinematics.linkPosition = endEffector[4]
         self.forwardKinematics.linkOrientationQuaternion = endEffector[5]
+        self.forwardKinematics.linkOrientationQuaternionXYZ = np.array(endEffector[5][0:3])
+        self.forwardKinematics.linkOrientationQuaternionW = np.array(endEffector[5][3])
+        #self.forwardKinematics.linkOrientationQuaternionWXYZ = np.array(endEffector[5][3] + endEffector[5][0:3])
         self.forwardKinematics.linkOrientationRPY = pb.getEulerFromQuaternion(endEffector[5])
         self.forwardKinematics.rotationMatrix = np.array(pb.getMatrixFromQuaternion(endEffector[5])).reshape(3,3)
         self.forwardKinematics.linkState = self.forwardKinematics.linkPosition + self.forwardKinematics.linkOrientationRPY
@@ -292,9 +300,33 @@ class Manipulator():
         self.TrajectoryPlan.jointAngleTraj = jointAngleTraj
         self.TrajectoryPlan.jointVelTraj = jointVelTraj
         self.TrajectoryPlan.jointAccelTraj = jointAccelTraj
-        
+    
+    def getMatrixFromRPY(self,rpy):
+        cr, cp, cy = [np.cos(i) for i in rpy]
+        sr, sp, sy = [np.sin(i) for i in rpy]
+        R = np.array([[cy*cp, cy*sp*sr - sy*cr, cy*sp*cr + sy*sr],
+                  [sy*cp, sy*sp*sr + cy*cr, sy*sp*cr - cy*sr],
+                  [-sp, cp*sr, cp*cr]])
+        return R
 
+    def getRPYFromMatrix(self,R):
         
+        r = np.arctan2(R[2, 1], R[2, 2])
+        p = np.arctan2(-R[2, 0], np.sqrt(R[2, 1] ** 2 + R[2, 2] ** 2))
+        y = np.arctan2(R[1, 0], R[0, 0])
+    
+        return r,p,y
+    
+    def getRPYOrientationError(self,currentOrientationRPY, desiredOrientationRPY):
+
+        desiredRotationMatrix = self.getMatrixFromRPY(desiredOrientationRPY)
+        currentRotationMatrix = self.getMatrixFromRPY(currentOrientationRPY)
+        
+        errorRotationMatrix = desiredRotationMatrix.dot(currentRotationMatrix.T)
+        
+        errorRPY = self.getRPYFromMatrix(errorRotationMatrix) 
+        
+        return errorRPY
          
             
     def plotValues(self, plotError, time):
