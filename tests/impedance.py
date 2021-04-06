@@ -13,7 +13,7 @@ import pybullet_utils.transformations as trans
 ## set the style for matplotli
 robot = Manipulator()
 pb.setRealTimeSimulation(False)
-jointAngles = [0,-1.57,1.57,1,1.,1.]
+jointAngles = [0,-2,2,-1.57,-1.57,-1.57]
 robot.setJointAngles(jointAngles)
 
 robot.turnOFFActuators()
@@ -23,7 +23,10 @@ robot.getForwardKinematics()
 robot.calculateJacobian()
 robot.getDyanamicMatrices()
 
-desEndEffector = np.array([0.3,-0.2,1.5,2,0.2,1.2])
+desEndEffector = robot.forwardKinematics.linkState
+# desEndEffector = np.array([0.3,-0.2,1.5,2,0.2,1.2])
+# droll,dpitch,dyaw = desEndEffector[3:6]
+
 droll,dpitch,dyaw = desEndEffector[3:6]
 desQuat = trans.unit_vector(trans.quaternion_from_euler(droll,dpitch,dyaw))
 
@@ -35,7 +38,7 @@ timeSteps = simTime * 240
 time = np.linspace(0,simTime,num=timeSteps)
 
 
-K_MATRIX = np.diag(6*[100])
+K_MATRIX = np.diag([500,500,500,500,500,500])
 D_MATRIX = 2 * np.sqrt(K_MATRIX)
 DES_INERTIA = 1* np.eye(6)
 initalForce = robot.controlZero
