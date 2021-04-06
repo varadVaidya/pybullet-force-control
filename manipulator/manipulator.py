@@ -58,11 +58,12 @@ class Manipulator():
     #container class to store dynamic matrices
     class RobotDynamicMatrices():
         
-        def __init__(self, massMatrix = None, coriolisVector = None , gravityVector = None) :
+        def __init__(self, massMatrix = None, coriolisVector = None , gravityVector = None , cartesianMassMatrix = None) :
             
             self.massMatrix = massMatrix
             self.coriolisVector = coriolisVector
             self.gravityVector = gravityVector
+            self.cartesianMassMatrix = cartesianMassMatrix
             
             
     
@@ -225,9 +226,16 @@ class Manipulator():
         )
         coriolisVector = coriolisGravityVector - gravityVector
         
+        ## calculate mass matrix in the cartesian space
+        
+        jacobianInv =  self.Jacobian.geometricJacobianInv
+        
+        cartesianMassMatrix = jacobianInv.T.dot(massMatrix.dot(jacobianInv))
+                
         self.DynamicMatrices.massMatrix = massMatrix
         self.DynamicMatrices.gravityVector = gravityVector
         self.DynamicMatrices.coriolisVector = coriolisVector
+        self.DynamicMatrices.cartesianMassMatrix = cartesianMassMatrix
     
     def turnOFFActuators(self):
         pb.setJointMotorControlArray(self.armID,self.controlJoints,pb.VELOCITY_CONTROL,forces = self.controlZero)
