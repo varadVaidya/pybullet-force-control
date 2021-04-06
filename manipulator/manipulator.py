@@ -356,7 +356,24 @@ class Manipulator():
         ax1.legend()
         
         plt.show()
-        
+    
+    def readGUIparams(self, ids):
+        val1 = pb.readUserDebugParameter(ids[0])
+        val2 = pb.readUserDebugParameter(ids[1])
+        val3 = pb.readUserDebugParameter(ids[2])
+        val4 = pb.readUserDebugParameter(ids[3])
+        val5 = pb.readUserDebugParameter(ids[4])
+        val6 = pb.readUserDebugParameter(ids[5])
+        return np.array([val1, val2, val3, val4, val5, val6])
+    
+    def ForceGUIcontrol(self, forces, max_limit = 10, min_limit = -10):
+        fxId = pb.addUserDebugParameter("fx", min_limit, max_limit, forces[0]) #force along x
+        fyId = pb.addUserDebugParameter("fy", min_limit, max_limit, forces[1]) #force along y
+        fzId = pb.addUserDebugParameter("fz", min_limit, max_limit, forces[2]) #force along z
+        mxId = pb.addUserDebugParameter("mx", min_limit, max_limit, forces[3]) #moment along x
+        myId = pb.addUserDebugParameter("my", min_limit, max_limit, forces[4]) #moment along y
+        mzId = pb.addUserDebugParameter("mz", min_limit, max_limit, forces[5]) #moment along z
+        return [fxId, fyId, fzId, mxId, myId, mzId]
     # def animate(self,i):
     #     if self.plotError[-1] is not None:
     #         Xe,Ye,Ze,Re,Pe,Ye = self.plotError[-1]
