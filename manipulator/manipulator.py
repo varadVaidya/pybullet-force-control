@@ -331,14 +331,13 @@ class Manipulator():
             
     def plotValues(self, plotError, time):
         
-        #style.use('fivethirtyeight')
+        style.use(['science' , 'std-colors'])
         
         fig = plt.figure()
         ax1 = fig.add_subplot(1,1,1)
         ax1.set_title('Error Over Time')
         
         
-        print("i reached here")
         ax1.plot(time,plotError[:,0] , label = 'X error' )
         ax1.plot(time,plotError[:,1] , label = 'Y error' )
         ax1.plot(time,plotError[:,2] , label = 'Z error' )
