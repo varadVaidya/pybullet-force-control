@@ -49,7 +49,7 @@ if titleFlag == 0:
         ax1.plot(csv[:,5],  label = 'Yaw Error') 
         ax1.legend()
         
-    ani = animation.FuncAnimation(fig,animate,interval = 1000)
+    ani = animation.FuncAnimation(fig,animate,interval = 300)
     plt.show()
 
 if titleFlag == 1:
@@ -82,6 +82,6 @@ if titleFlag == 1:
         ax1.plot(YawPos,  label = 'YawPos') 
         ax1.legend()    
         
-        ani = animation.FuncAnimation(fig,animate,interval = 100)
+        ani = animation.FuncAnimation(fig,animate,interval = 300)
         plt.show()
 
