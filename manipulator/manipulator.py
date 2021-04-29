@@ -357,6 +357,15 @@ class Manipulator():
         
         plt.show()
     
+    def writeToCSV(self,row):
+        """
+        this function will write to a csv file for continous plotting of the data in the row...
+        
+        THE row needs to be an 1D numpy array...
+                
+        """
+    
+    
     def readGUIparams(self, ids):
         val1 = pb.readUserDebugParameter(ids[0])
         val2 = pb.readUserDebugParameter(ids[1])
