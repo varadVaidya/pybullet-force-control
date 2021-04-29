@@ -8,6 +8,7 @@ from manipulator import Manipulator
 import numpy as np
 import pybullet as pb
 import pybullet_utils.transformations as trans
+from time import sleep
 #from ..manipulator.manipulator import Manipulator
 
 ## set the style for matplotli
@@ -36,37 +37,47 @@ simTime = 100 # sec
 timeSteps = simTime * 240
 time = np.linspace(0,simTime,num=timeSteps)
 
-for i in range(len(time)):
+f = open("plot.csv" , "w")
+f.truncate()
+f.close()
+with open("plot.csv",'a') as f:
+    
+    for i in range(len(time)):
+    
+        robot.getJointInfo()
+        robot.getForwardKinematics()
+        robot.calculateJacobian()
+        robot.getDyanamicMatrices()
+        
+        
+        endEffectorVel = robot.Jacobian.geometricJacobian.dot(robot.jointState.jointVelocities)
+        #print(endEffectorVel)
+        positionError = desEndEffector[0:3] - np.array(robot.forwardKinematics.linkPosition)
+        
+        currQuat = trans.unit_vector(robot.forwardKinematics.linkOrientationQuaternion)
+        
+        errorQuat = trans.quaternion_multiply(desQuat,trans.quaternion_conjugate(currQuat))
+        
+        orientationError = errorQuat[0:3] * np.sign(errorQuat[3])
+        
+        posError = np.hstack((positionError,orientationError))
 
-    robot.getJointInfo()
-    robot.getForwardKinematics()
-    robot.calculateJacobian()
-    robot.getDyanamicMatrices()
-    
-    
-    endEffectorVel = robot.Jacobian.geometricJacobian.dot(robot.jointState.jointVelocities)
-    #print(endEffectorVel)
-    positionError = desEndEffector[0:3] - np.array(robot.forwardKinematics.linkPosition)
-    
-    currQuat = trans.unit_vector(robot.forwardKinematics.linkOrientationQuaternion)
-    
-    errorQuat = trans.quaternion_multiply(desQuat,trans.quaternion_conjugate(currQuat))
-    
-    orientationError = errorQuat[0:3] * np.sign(errorQuat[3])
-    
-    posError = np.hstack((positionError,orientationError))
-    
-    #print("Pos Error",posError)
-    robot.plotError.append(posError)
-    
-    velocityError = desEndEffectorVel - endEffectorVel
-    
-    commanadedForce = Kp.dot(posError) + Kd.dot(velocityError)
-    
-    commanadedJointTorque = robot.Jacobian.geometricJacobian.T.dot(commanadedForce) + robot.DynamicMatrices.gravityVector
-    # robot.Jacobian.analyticJacobian.T.dot(commanadedForce)
-    pb.setJointMotorControlArray(robot.armID,robot.controlJoints,pb.TORQUE_CONTROL, forces = commanadedJointTorque)
-    pb.stepSimulation()
+        np.savetxt(f, posError.reshape(1,6),newline='\n',fmt='%f',delimiter=',')
+        #print("Pos Error",posError)
+        robot.plotError.append(posError)
+        
+        
+        
+        #np.savetxt('plot.csv',robot.plotError,delimiter=',')
+        velocityError = desEndEffectorVel - endEffectorVel
+        
+        commanadedForce = Kp.dot(posError) + Kd.dot(velocityError)
+        
+        commanadedJointTorque = robot.Jacobian.geometricJacobian.T.dot(commanadedForce) + robot.DynamicMatrices.gravityVector
+        # robot.Jacobian.analyticJacobian.T.dot(commanadedForce)
+        pb.setJointMotorControlArray(robot.armID,robot.controlJoints,pb.TORQUE_CONTROL, forces = commanadedJointTorque)
+        pb.stepSimulation()
+        sleep(0.5)
     
 plotError = np.array(robot.plotError)
 print("i reached here")
