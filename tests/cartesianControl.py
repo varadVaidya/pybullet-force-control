@@ -77,7 +77,6 @@ with open("plot.csv",'a') as f:
         # robot.Jacobian.analyticJacobian.T.dot(commanadedForce)
         pb.setJointMotorControlArray(robot.armID,robot.controlJoints,pb.TORQUE_CONTROL, forces = commanadedJointTorque)
         pb.stepSimulation()
-        sleep(0.5)
     
 plotError = np.array(robot.plotError)
 print("i reached here")
