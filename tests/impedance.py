@@ -9,8 +9,8 @@ import numpy as np
 import pybullet as pb
 import pybullet_utils.transformations as trans
 #from ..manipulator.manipulator import Manipulator
-
-## set the style for matplotli
+#from ..manipulator.manipulator import Manipulator
+## set the style for matplotlib
 robot = Manipulator()
 pb.setRealTimeSimulation(False)
 jointAngles = [0,-2,2,-1.57,-1.57,-1.57]
@@ -38,9 +38,10 @@ timeSteps = simTime * 240
 time = np.linspace(0,simTime,num=timeSteps)
 
 
-K_MATRIX = np.diag([500,500,500,500,500,500])
+K_MATRIX = np.diag([100,100,100,100,100,100])
 D_MATRIX = 2 * np.sqrt(K_MATRIX)
-DES_INERTIA = 1* np.eye(6)
+#DES_INERTIA = robot.DynamicMatrices.cartesianMassMatrix
+DES_INERTIA = 0.1 * np.eye(6)
 initalForce = robot.controlZero
 ForceGUIids = robot.ForceGUIcontrol(forces=initalForce, max_limit=10, min_limit=-10)
 
