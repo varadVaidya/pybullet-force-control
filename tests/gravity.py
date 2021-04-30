@@ -10,16 +10,40 @@ import pybullet as pb
 from time import sleep
 ## set the style for matplotli
 robot = Manipulator()
-
+table = pb.loadURDF("table/table.urdf", [0.35,0.35,0], pb.getQuaternionFromEuler([0,0,1.57]))
 jointAngles = [1,-1.5,1.5,-1.57,-1.57,-1.57]
 robot.setJointAngles(jointAngles)
 
-FREE_FALL = False
+FREE_FALL = True
 
 robot.turnOFFActuators()
 ## sets the arm in free fall as no torques is applied on the joints.
 if FREE_FALL:
     torque = 6*[0]
+    shift = [0, -0.02, 0]
+    meshScale = [0.5, 0.5, 0.5]
+    visualShapeId = pb.createVisualShape(shapeType=pb.GEOM_MESH,
+                                    fileName="duck.obj",
+                                    rgbaColor=[1, 1, 1, 1],
+                                    specularColor=[0.4, .4, 0],
+                                    visualFramePosition=shift,
+                                    meshScale=meshScale)
+    
+    collisionShapeId = pb.createCollisionShape(shapeType=pb.GEOM_MESH,
+                                          fileName="duck_vhacd.obj",
+                                          collisionFramePosition=shift,
+                                          meshScale=meshScale)
+    rangex = 10
+    rangey = 10
+    for i in range(rangex):
+        for j in range(rangey):
+            pb.createMultiBody(baseMass=1,
+                            baseInertialFramePosition=[0, 0, 0],
+                            baseCollisionShapeIndex=collisionShapeId,
+                            baseVisualShapeIndex=visualShapeId,
+                            basePosition=[((-rangex / 2) + i + 3.5) * meshScale[0] * 2,
+                                            (-rangey / 2 + j + 3.5) * meshScale[1] * 2, 1],
+                            useMaximalCoordinates=True)
     
     while True:
         
@@ -31,7 +55,9 @@ if not FREE_FALL:
     
     while True:
         
-        robot.getJointInfo()
+        rrobot.getJointInfo()
+        robot.getForwardKinematics()
+        robot.calculateJacobian()
         robot.getDyanamicMatrices()
         
         torque = robot.DynamicMatrices.gravityVector
