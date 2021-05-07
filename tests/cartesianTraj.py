@@ -14,8 +14,13 @@ import pybullet_utils.transformations as trans
 robot = Manipulator()
 table = pb.loadURDF("table/table.urdf", [0.,0.6,0], pb.getQuaternionFromEuler([0,0,0]))
 
+info = pb.getDynamicsInfo(table,-1)
+print(info)
+pb.changeDynamics(table,-1,restitution = 0.9,lateralFriction = 0)
+info = pb.getDynamicsInfo(table,-1)
+print(info)
 pb.setRealTimeSimulation(False)
-jointAngles = [0,-1.57,1.57,1,1.,1.]
+jointAngles = [1,0,0.8,-2.37,-1.57,-1.57]
 robot.setJointAngles(jointAngles)
 
 robot.turnOFFActuators()
@@ -25,12 +30,12 @@ robot.getForwardKinematics()
 desQuat = [1,0,-1,0]
 
 
-point1 = robot.Waypoint(position=[0.3,0.2,1.5],velocity=[0,0,0],acceleration=[0,0,0])
-point2 = robot.Waypoint(position=[0.3,0.6,0.6],velocity=[0,0,0],acceleration=[0,0,0])
+point1 = robot.Waypoint(position=robot.forwardKinematics.linkPosition,velocity=[0,0,0],acceleration=[0,0,0])
+point2 = robot.Waypoint(position=[-0.2,0.5,0.4],velocity=[0,0,0],acceleration=[0,0,0])
 
 
 # sim time parameters
-simTime = 60 # sec
+simTime = 100 # sec
 trajTime = 30 #sec
 timeSteps = simTime * 240
 time = np.linspace(0,simTime,num=timeSteps)
@@ -71,7 +76,8 @@ for i in range(len(time)):
     endEffectorforces = robot.jointForceTorqueSensorValues()
     #print(endEffectorforces)
     robot.plotError.append(endEffectorforces)
-    
+    resultant = np.linalg.norm(endEffectorforces)
+    print(resultant)
     #print(endEffectorforces[-1])
     
         
