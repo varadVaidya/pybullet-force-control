@@ -21,7 +21,7 @@ robot.turnOFFActuators()
 if FREE_FALL:
     torque = 6*[0]
     shift = [0, -0.02, 0]
-    meshScale = [0.5, 0.5, 0.5]
+    meshScale = [0.1, 0.1, 0.1]
     visualShapeId = pb.createVisualShape(shapeType=pb.GEOM_MESH,
                                     fileName="duck.obj",
                                     rgbaColor=[1, 1, 1, 1],
@@ -41,8 +41,8 @@ if FREE_FALL:
                             baseInertialFramePosition=[0, 0, 0],
                             baseCollisionShapeIndex=collisionShapeId,
                             baseVisualShapeIndex=visualShapeId,
-                            basePosition=[((-rangex / 2) + i + 3.5) * meshScale[0] * 2,
-                                            (-rangey / 2 + j + 3.5) * meshScale[1] * 2, 1],
+                            basePosition=[((-rangex / 2) + i) * meshScale[0] * 2,
+                                            (-rangey / 2 + j) * meshScale[1] * 2, 1],
                             useMaximalCoordinates=True)
     
     while True:
