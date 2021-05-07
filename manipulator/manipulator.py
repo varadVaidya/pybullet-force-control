@@ -309,6 +309,84 @@ class Manipulator():
         self.TrajectoryPlan.jointVelTraj = jointVelTraj
         self.TrajectoryPlan.jointAccelTraj = jointAccelTraj
     
+    class Waypoint():
+        
+        # container class for storing waypoints for travelling
+        """
+        TODO: ADD QUATERNION IN THE TRAJ PLAN AS WELL
+        """   
+        
+        ## the postion velocity and acceleration are the contraints that will be used..
+        def __init__(self,position = None,velocity = None,acceleration = None):
+                self.position = position
+                self.velocity = velocity
+                self.acceleration = acceleration
+                
+    
+    def planCartesianTraj(self,point1,point2,trajTime,simTimeArray,cartesianIndex):
+        # plan a cartesian trajectory between two points in cartesian space
+        #this function will make a 1D trajectory between start point (pos,vel,accel) and end point (pos,vel,accel)
+        #point1 and point2 will be the child of the waypoint class
+        # cartesian index will define whioch traj are we planning.. so index = 0 means x traj and so on
+        i = cartesianIndex
+        postionTraj = np.empty_like(simTimeArray)
+        velocityTraj = np.empty_like(simTimeArray)
+        accelTraj = np.empty_like(simTimeArray)
+        
+        simTime = trajTime # sec
+        timeSteps = simTime * 240
+        time = np.linspace(0,simTime,num=timeSteps)
+        
+        coeffMatrix = np.array([
+            [0,0,0,1],
+            [0,0,1,0],
+            [pow(trajTime,3),pow(trajTime,2),trajTime,1],
+            [3*pow(trajTime,2),2*trajTime,1,0]
+        ])
+        
+        positonConstriant = [point1.position[i], point1.velocity[i], point2.position[i], point2.velocity[i]]
+        
+        postionCoeff = np.linalg.solve(coeffMatrix,positonConstriant)
+        VelocityCoeff = [3*postionCoeff[0] , 2*postionCoeff[1], postionCoeff[2]]
+        
+        position = np.polyval(postionCoeff,time)
+        velocity = np.polyval(VelocityCoeff,time)
+        acceleration = np.zeros_like(time)
+        
+        postionTraj[0:position.size] = position
+        velocityTraj[0:velocity.size] = velocity
+        accelTraj[0:acceleration.size] = acceleration
+        
+        postionTraj[position.size:] = position[-1]
+        velocityTraj[velocity.size:] = velocity[-1]
+        accelTraj[acceleration.size:] = acceleration[-1]
+        
+        
+        return postionTraj,velocityTraj,accelTraj
+    
+    def getCartesianTraj(self,point1,point2,trajTime,simTimeArray):
+        
+        positionTrajectory = []
+        velocityTrajectory = []
+        accelerationTrajectory = []
+        
+        for i in range(len(point1.position)):
+            posTraj,velTraj,accelTraj = self.planCartesianTraj(point1,point2,trajTime,simTimeArray,i)
+            positionTrajectory.append(posTraj)
+            velocityTrajectory.append(velTraj)
+            accelerationTrajectory.append(accelTraj)
+        
+        positionTrajectory = np.array(positionTrajectory).T
+        velocityTrajectory = np.array(velocityTrajectory).T
+        accelerationTrajectory = np.array(accelerationTrajectory).T
+        
+        return positionTrajectory,velocityTrajectory,accelerationTrajectory
+        
+    def jointForceTorqueSensorValues(self):
+        joint = pb.getJointState(self.armID,self.endEffectorIndex)
+        
+        return joint[2]
+    
     def getMatrixFromRPY(self,rpy):
         cr, cp, cy = [np.cos(i) for i in rpy]
         sr, sp, sy = [np.sin(i) for i in rpy]
