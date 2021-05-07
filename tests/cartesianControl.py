@@ -22,7 +22,7 @@ robot.turnOFFInternalDamping()
 robot.getJointInfo()
 robot.getForwardKinematics()
 
-desEndEffector = desEndEffector = np.array([0.3,0.2,1.5,2,0.2,1.2])
+desEndEffector = np.array([0.3,0.2,1.5,0,0,0])
 droll,dpitch,dyaw = desEndEffector[3:6]
 desQuat = trans.unit_vector(trans.quaternion_from_euler(droll,dpitch,dyaw))
 
